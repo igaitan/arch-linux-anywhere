@@ -75,13 +75,13 @@ arch_anywhere_chroot() {
 			break
 		elif (<<<"$input" grep "^cd " &> /dev/null); then
 			ch_dir=$(<<<$input cut -c4-)
-			arch-chroot "$ARCH" /bin/bash -c "cd $working_dir ; cd $ch_dir ; pwd > /etc/chroot_dir.var"
+			${arch_chroot_tool} "$ARCH" /bin/bash -c "cd $working_dir ; cd $ch_dir ; pwd > /etc/chroot_dir.var"
 			mv "$ARCH"/etc/chroot_dir.var /tmp/
 			working_dir=$(</tmp/chroot_dir.var)
 		elif  (<<<"$input" grep "^help" &> /dev/null); then
 			echo -e "$arch_chroot_msg"
-			else
-			arch-chroot "$ARCH" /bin/bash -c "cd $working_dir ; $input"
+		else
+			${arch_chroot_tool} "$ARCH" /bin/bash -c "cd $working_dir ; $input"
 		fi
 		input=
 	done

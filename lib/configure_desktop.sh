@@ -400,7 +400,7 @@ config_env() {
 	fi
 
 	echo "$(date -u "+%F %H:%M") : Configured: $config_DE" >> "$log"
-	arch-chroot "$ARCH" fc-cache -f
+	${arch_chroot_tool} "$ARCH" fc-cache -f
 
 }
 

@@ -28,19 +28,19 @@ grub_config() {
 	fi
 
 	if "$UEFI" ; then
-		(arch-chroot "$ARCH" grub-install --efi-directory="$esp_mnt" --target=x86_64-efi --bootloader-id=boot
+		(${arch_chroot_tool} "$ARCH" grub-install --efi-directory="$esp_mnt" --target=x86_64-efi --bootloader-id=boot
 		cp "$ARCH"/"$esp_mnt"/EFI/boot/grubx64.efi "$ARCH"/"$esp_mnt"/EFI/boot/bootx64.efi) &> /dev/null &
 		pid=$! pri=0.1 msg="\n$grub_load1 \n\n \Z1> \Z2grub-install --efi-directory="$esp_mnt"\Zn" load
 
 		if ! "$crypted" ; then
-			arch-chroot "$ARCH" mkinitcpio -p "$kernel" &>/dev/null &
+			${arch_chroot_tool} "$ARCH" mkinitcpio -p "$kernel" &>/dev/null &
 			pid=$! pri=1 msg="\n$uefi_config_load \n\n \Z1> \Z2mkinitcpio -p $kernel\Zn" load
 		fi
 	else
-		arch-chroot "$ARCH" grub-install /dev/"$DRIVE" &> /dev/null &
+		${arch_chroot_tool} "$ARCH" grub-install /dev/"$DRIVE" &> /dev/null &
 		pid=$! pri=0.1 msg="\n$grub_load1 \n\n \Z1> \Z2grub-install /dev/$DRIVE\Zn" load
 	fi
-	arch-chroot "$ARCH" grub-mkconfig -o /boot/grub/grub.cfg &> /dev/null &
+	${arch_chroot_tool} "$ARCH" grub-mkconfig -o /boot/grub/grub.cfg &> /dev/null &
 	pid=$! pri=0.1 msg="\n$grub_load2 \n\n \Z1> \Z2grub-mkconfig -o /boot/grub/grub.cfg\Zn" load
 
 }
@@ -70,7 +70,7 @@ syslinux_config() {
 			sed -i 's/initramfs-linux-fallback.img/initramfs-linux-zen-fallback.img/' ${ARCH}${esp_mnt}/EFI/syslinux/syslinux.cfg
 		fi
 
-		arch-chroot "$ARCH" efibootmgr -c -d /dev/"$esp_part" -p "$esp_part_int" -l /EFI/syslinux/syslinux.efi -L "Syslinux") &> /dev/null &
+		${arch_chroot_tool} "$ARCH" efibootmgr -c -d /dev/"$esp_part" -p "$esp_part_int" -l /EFI/syslinux/syslinux.efi -L "Syslinux") &> /dev/null &
 		pid=$! pri=0.1 msg="\n$syslinux_load \n\n \Z1> \Z2syslinux install efi mode...\Zn" load
 
 		if "$crypted" ; then
@@ -119,7 +119,7 @@ syslinux_config() {
 systemd_config() {
 
 	esp_mnt=$(<<<$esp_mnt sed "s!$ARCH!!")
-	(arch-chroot "$ARCH" bootctl --path="$esp_mnt" install
+	(${arch_chroot_tool} "$ARCH" bootctl --path="$esp_mnt" install
 	cp /usr/share/systemd/bootctl/loader.conf ${ARCH}${esp_mnt}/loader/
 	echo "timeout 4" >> ${ARCH}${esp_mnt}/loader/loader.conf) &> /dev/null &
 	pid=$! pri=0.1 msg="\n$syslinux_load \n\n \Z1> \Z2bootctl --path="$esp_mnt" install\Zn" load

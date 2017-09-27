@@ -596,7 +596,7 @@ add_software() {
 							fi
 
 							if (dialog --yes-button "$install" --no-button "$cancel" --yesno "\n$software_confirm_var1" "$height" 65) then
-								arch-chroot "$ARCH" pacman --noconfirm -Sy $(echo "$download") &>>"$log" &
+								${arch_chroot_tool} "$ARCH" pacman --noconfirm -Sy $(echo "$download") &>>"$log" &
 								pid=$! pri=$(<<<"$down" sed 's/\..*$//') msg="\n$software_load_var" load_log
 								echo "$(date -u "+%F %H:%M") : Finished installing software" >> "$log"
 								unset final_software

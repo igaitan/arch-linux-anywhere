@@ -58,15 +58,15 @@ add_user() {
 								dialog --ok-button "$ok" --msgbox "\n$fulluser_err_msg1" 10 60
 							else
 								if [ "$full_user" == "" ]; then
-									arch-chroot "$ARCH" useradd -m -g users -G audio,network,power,storage,optical -s "$sh" "$user" &>/dev/null &
+									${arch_chroot_tool} "$ARCH" useradd -m -g users -G audio,network,power,storage,optical -s "$sh" "$user" &>/dev/null &
 								else
-									arch-chroot "$ARCH" useradd -m -g users -G audio,network,power,storage,optical -c "$full_user" -s "$sh" "$user" &>/dev/null &
+									${arch_chroot_tool} "$ARCH" useradd -m -g users -G audio,network,power,storage,optical -c "$full_user" -s "$sh" "$user" &>/dev/null &
 								fi
 								set_password
 								echo "$(date -u "+%F %H:%M") : Added user: $user" >> "$log"
 									if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$sudo_var" 10 60) then
 									(sed -i '/%wheel ALL=(ALL) ALL/s/^#//' $ARCH/etc/sudoers
-									arch-chroot "$ARCH" usermod -a -G wheel "$user") &> /dev/null &
+									${arch_chroot_tool} "$ARCH" usermod -a -G wheel "$user") &> /dev/null &
 								fi
 								break
 							fi
@@ -107,19 +107,19 @@ add_user() {
 						;;
 						"$change_sh")
 							user_sh=$(dialog --ok-button "$select" --cancel-button "$cancel" --menu "$user_shell_var" 12 55 3 \
-								$(for i in $(arch-chroot "$ARCH" chsh -l | sed 's!.*/!!' | uniq) ; do
+								$(for i in $(${arch_chroot_tool} "$ARCH" chsh -l | sed 's!.*/!!' | uniq) ; do
 									echo "$i ->"
 								done) 3>&1 1>&2 2>&3)
 							if [ "$?" -eq "0" ]; then
 								case "$user_sh" in
 									zsh)
-										arch-chroot "$ARCH" chsh "$user" -s /usr/bin/zsh &>/dev/null
+										${arch_chroot_tool} "$ARCH" chsh "$user" -s /usr/bin/zsh &>/dev/null
 									;;
 									fish)
-										arch-chroot "$ARCH" chsh "$user" -s /bin/bash &>/dev/null
+										${arch_chroot_tool} "$ARCH" chsh "$user" -s /bin/bash &>/dev/null
 									;;
 									*)
-										arch-chroot "$ARCH" chsh "$user" -s /bin/"$user_sh" &>/dev/null
+										${arch_chroot_tool} "$ARCH" chsh "$user" -s /bin/"$user_sh" &>/dev/null
 									;;
 
 								esac
@@ -128,11 +128,11 @@ add_user() {
 						"$change_su")
 							if [ "$sudo" == "$yes" ]; then
 								if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$sudo_var1" 10 60) then
-									arch-chroot "$ARCH" gpasswd -d "$user" wheel &>/dev/null
+									${arch_chroot_tool} "$ARCH" gpasswd -d "$user" wheel &>/dev/null
 								fi
 							else
 								if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$sudo_var" 10 60) then
-									arch-chroot "$ARCH" usermod -a -G wheel "$user" &>/dev/null
+									${arch_chroot_tool} "$ARCH" usermod -a -G wheel "$user" &>/dev/null
 								fi
 							fi
 						;;
@@ -150,14 +150,14 @@ add_user() {
 									if [ "$full_user" == "" ]; then
 										full_user="$user"
 									fi
-									arch-chroot "$ARCH" chfn -f "$full_user" "$user" &>/dev/null
+									${arch_chroot_tool} "$ARCH" chfn -f "$full_user" "$user" &>/dev/null
 									break
 								fi
 							done
 						;;
 						"$del_user")
 							if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$deluser_var" 10 60) then
-								arch-chroot "$ARCH" userdel --remove "$user" &>/dev/null
+								${arch_chroot_tool} "$ARCH" userdel --remove "$user" &>/dev/null
 								break
 							fi
 						;;
@@ -189,7 +189,7 @@ set_password() {
 		fi
 	done
 
-	(printf "$input\n$input" | arch-chroot "$ARCH" passwd "$user") &> /dev/null &
+	(printf "$input\n$input" | ${arch_chroot_tool} "$ARCH" passwd "$user") &> /dev/null &
 	pid=$! pri=0.1 msg="$wait_load \n\n \Z1> \Z2passwd $user\Zn" load
 	unset input input_chk ; input_chk=default
 	echo "$(date -u "+%F %H:%M") : Password set: $user" >> "$log"
