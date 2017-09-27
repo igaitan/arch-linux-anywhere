@@ -84,17 +84,17 @@ update_mirrors() {
 				esac
                 
 				if [ "$code" == "$default" ]; then
-					curl -s "$mirror_url" | sed '10,1000d;s/#//' >/etc/pacman.d/mirrorlist.bak &
+					curl -s "$mirror_url" | sed '10,1000d;s/#//' >/etc/pacman.d/mirrorlist-arch.bak &
 				else
-					curl -s "$mirror_url" >/etc/pacman.d/mirrorlist.bak &
+					curl -s "$mirror_url" >/etc/pacman.d/mirrorlist-arch.bak &
 				fi
 				pid=$! pri=0.1 msg="\n$mirror_load0 \n\n \Z1> \Z2curl $mirror_url\Zn" load
                 
-				if (grep "Server" /etc/pacman.d/mirrorlist.bak &>/dev/null); then
+				if (grep "Server" /etc/pacman.d/mirrorlist-arch.bak &>/dev/null); then
 					echo "$(date -u "+%F %H:%M") : Updated Mirrors From: $code" >> "$log"
-					sed -i 's/#//' /etc/pacman.d/mirrorlist.bak
-					rankmirrors -n 6 /etc/pacman.d/mirrorlist.bak > /etc/pacman.d/mirrorlist &
-				 	pid=$! pri=0.8 msg="\n$mirror_load1 \n\n \Z1> \Z2rankmirrors -n 6 /etc/pacman.d/mirrorlist\Zn" load
+					sed -i 's/#//' /etc/pacman.d/mirrorlist-arch.bak
+					rankmirrors -n 6 /etc/pacman.d/mirrorlist-arch.bak > /etc/pacman.d/mirrorlist-arch &
+				 	pid=$! pri=0.8 msg="\n$mirror_load1 \n\n \Z1> \Z2rankmirrors -n 6 /etc/pacman.d/mirrorlist-arch\Zn" load
 				else
 					dialog --ok-button "$ok" --msgbox "\n$connect_err0" 10 60
 					echo "$(date -u "+%F %H:%M") : Failed to connect to wifi: Exit 1" >> "$log"
@@ -112,7 +112,7 @@ update_mirrors() {
 						break
 					fi
 				else
-					$EDITOR /etc/pacman.d/mirrorlist
+					$EDITOR /etc/pacman.d/mirrorlist-arch
 					break
 				fi
 			;;
